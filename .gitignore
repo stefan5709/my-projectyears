@@ -1,0 +1,12 @@
+node_modules/
+.env
+# Dependencies
+node_modules/
+dist/
+
+# Environment
+.env
+.env.local
+
+# System
+.DS_Store
