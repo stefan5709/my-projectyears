@@ -1,26 +1,20 @@
+import { Link } from 'react-router-dom';
 
-const Navbar = () => {
+function Navbar() {
     return (
-        <nav className="flex justify-between items-center py-6 px-10 bg-white shadow-md top-0 z-50">
-            <div className="flex items-center gap-2">
-                <span className="font-bold text-5xl text-emerald-700">Fit cu Stil</span>
+        <nav className="flex justify-between items-center p-4 bg-white shadow-md">
+            <div className="flex space-x-6">
+                <Link to="/" className="font-bold hover:text-blue-500">Acasă</Link>
+                <Link to="/despre-noi" className="hover:text-blue-500">Despre noi</Link>
+                <Link to="/shop" className="hover:text-blue-500">Shop</Link>
+                <Link to="/contact" className="hover:text-blue-500">Contact</Link>
             </div>
-            <ul className="hidden md:flex gap-8 text-black-800 px-2 py-2 font-medium">
-                <li><a href="#">Acasă</a></li>
-                <li><a href="#">Despre noi</a></li>
-                <li><a href="#">Shop</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-
-            <div className="flex flex-row gap-4">
-                <button className="bg-gray-100 hover:bg-gray-300 text-black px-8 py-2 rounded">Sign In</button>
-                <button className="bg-emerald-600 hover:bg-emerald-800 text-white px-8 py-2 rounded ">Log In</button>
+            <div>
+                <Link to="/signin" className="mr-4 hover:text-gray-300">Sign In</Link>
+                <Link to="/login" className="hover:text-emerald-500">Log In</Link>
             </div>
-
-
         </nav>
     );
-};
-
+}
 
 export default Navbar;
