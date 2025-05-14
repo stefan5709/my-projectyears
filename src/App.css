@@ -1,8 +1,7 @@
 @layer theme, base, components, utilities;
 @import "tailwindcss";
 #root {
-  
-  
+
   text-align: center;
 }
 
@@ -12,6 +11,8 @@
   font-weight: 700;
   color: #333;
 }
+
+
 
 .logo {
   height: 6em;

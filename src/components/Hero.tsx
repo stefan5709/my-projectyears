@@ -1,11 +1,11 @@
 const Hero = () => {
     return (
-        <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="max-w-7xl mx-auto px-4 py-12">
             {/* Pantofi */}
             <div className="mb-16 p-8 bg-gray-50 rounded-xl">
                 <div className="flex flex-col md:flex-row gap-8 items-center">
                     <div className="md:w-1/2">
-                        <h1 className="text-2xl font-bold mb-8">Alege Încălțămintea top</h1>
+                        <h2 className="text-4xl font-bold mb-8">Alege Încălțămintea top</h2>
                         <blockquote className="text-2xl italic mb-6">„Mișcă-te cu stil. T-Mork.”</blockquote>
                         <p className="text-lg mb-8">
                             T-Mork nu e doar o pereche de pantofi sport. Este o declarație de stil, viteză și motivație.
@@ -31,7 +31,7 @@ const Hero = () => {
             <div className="mb-16 p-8 bg-blue-50 rounded-xl">
                 <div className="flex flex-col md:flex-row-reverse gap-8 items-center">
                     <div className="md:w-1/2">
-                        <h1 className="text-2xl font-bold mb-6">FlexWear - Respiră mișcarea</h1>
+                        <h2 className="text-4xl font-bold mb-6">FlexWear - Respiră mișcarea</h2>
                         <p className="text-lg mb-8">
                             Tricou sport ușor, elastic și ultra-respirabil. Ideal pentru orice tip de antrenament intens.
                         </p>
@@ -54,7 +54,7 @@ const Hero = () => {
             <div className="p-8 bg-gray-50 rounded-xl">
                 <div className="flex flex-col md:flex-row gap-8 items-center">
                     <div className="md:w-1/2">
-                        <h1 className="text-3xl font-bold mb-6">PowerGrip</h1>
+                        <h2 className="text-4xl font-bold mb-6">PowerGrip</h2>
                         <p className="text-xl mb-4">Control total, fără compromisuri</p>
                         <p className="text-lg mb-8">
                             PowerGrip este alegerea ideală pentru cei care ridică serios. Aceste mănuși de sală sunt

@@ -14,7 +14,7 @@ function App() {
   return (
     <Router>
       <div className="font-sans">
-        <Navbar /> {/* Navbar-ul va rămâne vizibil pe toate paginile */}
+        <Navbar />
 
         <Routes>
           <Route path="/" element={
