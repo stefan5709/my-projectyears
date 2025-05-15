@@ -4,7 +4,13 @@ function Navbar() {
     return (
         <nav className="flex justify-between items-center p-4 bg-white shadow-md">
             <div className="w-auto"></div>
-            <span className="font-bold text-4xl text-emerald-700">Fit cu Stil</span>
+
+            <img
+                src="/img/logo.png"
+                alt="Pantofi sport T-Mork"
+                className="w-16 h-14 rounded-lg" />
+
+            <span className="font-bold text-5xl text-emerald-700"> Fit cu Stil</span>
 
             <div className="flex space-x-6">
                 <Link to="/" className="font-bold hover:text-blue-500">Acasă</Link>
