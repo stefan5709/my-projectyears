@@ -8,7 +8,13 @@ import Acasa from "./components/pagesNavbar/Acasa";
 import Desprenoi from "./components/pagesNavbar/Desprenoi";
 import Shop from "./components/pagesNavbar/Shop";
 import Contact from "./components/pagesNavbar/Contact";
+import LogIn from './components/button/LogIn';
+import SignIn from './components/button/SignIn';
+import DashBoard from "./components/button/Dashboard";
+
+
 import './App.css';
+
 
 function App() {
   return (
@@ -22,13 +28,18 @@ function App() {
               <Hero />
               <Products />
               <Featured />
-            </>
-          } />
 
+            </>
+
+          } />
+          <Route path="/login" element={<LogIn />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/dashboard" element={<DashBoard />} />
           <Route path="/acasa" element={<Acasa />} />
           <Route path="/despre-noi" element={<Desprenoi />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/contact" element={<Contact />} />
+
         </Routes>
 
         <Footer />
