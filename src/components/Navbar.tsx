@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { UserIcon } from '@heroicons/react/24/outline';
-import { Search } from 'lucide-react';
+
+
 
 function Navbar() {
 
@@ -30,10 +31,6 @@ function Navbar() {
                     <span className="h-8 w-px bg-gray-300 ml-22"></span>
                     <Link to="/dashboard" className="flex items-center space-x-1 hover:text-blue-500">
                         <UserIcon className="w-5 h-5" />
-                    </Link>
-
-                    <Link to="/dashboard" className="flex items-center space-x-1 hover:text-blue-500">
-                        <Search className="w-5 h-5" />
                     </Link>
 
                     <Link to="/signin" className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-emerald-700 transition-colors duration-300  ">Sign In</Link>
