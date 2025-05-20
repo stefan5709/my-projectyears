@@ -12,22 +12,13 @@ const Featured = () => {
                         className="w-full h-auto rounded-lg shadow-xl"
                     ></img>
 
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h3 className="text-xl font-semibold mb-2">SmartFit Torch</h3>
-                        <p className="mb-4">
-                            Lumină puternică pentru antrenamentele de seară sau plimbările de dimineață. Compactă, modernă și mereu pregătită.
-                        </p>
-                        <p className="text-sm text-gray-500 mb-4">Reviews (24)</p>
-                        <div className="items-center gap-2">
-                            <span className="text-lg font-bold">$240.00</span>
-                            <span className="text-sm text-gray-500 line-through">$480.00</span>
-                        </div>
-                    </div>
-
+                    <img src="/img/feature_prod_01.jpg"
+                        className="w-full h-auto rounded-lg shadow-xl"></img>
                     <img src="/img/feature_prod_03.jpg"
                         className="w-full h-auto overflow-visible rounded-lg shadow-xl">
 
                     </img>
+
                     <div className="bg-white p-6 rounded-lg shadow">
                         <h3 className="text-xl font-semibold mb-2">WatchX Pro</h3>
                         <p className="mb-4">
@@ -40,8 +31,17 @@ const Featured = () => {
                         </div>
                     </div>
 
-                    <img src="/img/feature_prod_01.jpg"
-                        className="w-full h-auto rounded-lg shadow-xl"></img>
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-xl font-semibold mb-2">SmartFit Torch</h3>
+                        <p className="mb-4">
+                            Lumină puternică pentru antrenamentele de seară sau plimbările de dimineață. Compactă, modernă și mereu pregătită.
+                        </p>
+                        <p className="text-sm text-gray-500 mb-4">Reviews (24)</p>
+                        <div className="items-center gap-2">
+                            <span className="text-lg font-bold">$240.00</span>
+                            <span className="text-sm text-gray-500 line-through">$480.00</span>
+                        </div>
+                    </div>
 
                     <div className="bg-white p-6 rounded-lg shadow">
                         <h3 className="text-xl font-semibold mb-2">RetroMotion Cam</h3>

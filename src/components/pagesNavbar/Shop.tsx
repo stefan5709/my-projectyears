@@ -4,13 +4,13 @@ import { FiShoppingCart, FiHeart, FiSearch, FiStar } from "react-icons/fi"
 import { useState } from "react"
 
 const Shop = () => {
-    // State for current page
+
     const [currentPage, setCurrentPage] = useState(1)
 
-    // Products per page
+
     const productsPerPage = 12
 
-    // Produse
+
     const products = [
         {
             id: 1,
