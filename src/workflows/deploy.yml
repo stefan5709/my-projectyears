@@ -3,7 +3,7 @@ name: Deploy to Netlify
 on:
   push:
     branches:
-      - main  # sau 'master', în funcție de ramura ta principală
+      - main  
 
 jobs:
   build:
