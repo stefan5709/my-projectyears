@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Contact from "./components/pagesNavbar/Contact"
 import Products from "./components/Products"
-import ProductDetail from "./components/Cartpages/ProductDetail"
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Featured from "./components/Featured";
@@ -12,6 +11,9 @@ import Footer from "./components/Footer";
 import LogIn from './components/button/LogIn';
 import SignIn from './components/button/SignIn';
 import DashBoard from "./components/button/Dashboard";
+import ProductDetail from './components/pagesNavbar/ProductDetail';
+
+
 
 import './App.css';
 
@@ -335,33 +337,37 @@ const productData = [
 
 function App() {
   return (
+
     <Router>
       <div className="font-sans">
         <Navbar />
 
         <Routes>
-          <Route path="/" element={
-            <>
-              <Hero />
-              <Products />
-              <Featured />
-            </>
-          } />
+          <Route
+            path="/"
+            element={
+              <>
+                <Hero />
+                <Products />
+                <Featured />
+              </>
+            }
+          />
           <Route path="/login" element={<LogIn />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/dashboard" element={<DashBoard />} />
           <Route path="/acasa" element={<Acasa />} />
           <Route path="/despre-noi" element={<Desprenoi />} />
           <Route path="/shop" element={<Shop products={productData} />} />
+          <Route path="/product/:id" element={<ProductDetail products={productData} />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-
         </Routes>
 
         <Footer />
       </div>
     </Router>
-  );
+
+  )
 }
 
-export default App;
+export default App

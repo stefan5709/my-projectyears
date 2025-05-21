@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
 import { UserIcon } from '@heroicons/react/24/outline';
 
-
-
 function Navbar() {
 
     return (

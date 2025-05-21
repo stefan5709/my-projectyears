@@ -1,12 +1,8 @@
-"use client"
-
 import type React from "react"
-
 import { FiShoppingCart, FiHeart, FiSearch, FiStar } from "react-icons/fi"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 
-// Define the Product type
 interface Product {
     id: number
     name: string
@@ -17,58 +13,55 @@ interface Product {
     category?: string
 }
 
-// Define the CartItem type
 interface CartItem extends Product {
     quantity: number
 }
 
-// Define the props for the Shop component
 interface ShopProps {
     products: Product[]
+    addToCart?: (product: Product) => void
 }
 
-const Shop = ({ products }: ShopProps) => {
+const Shop = ({ products, addToCart }: ShopProps) => {
     const [currentPage, setCurrentPage] = useState(1)
     const [cart, setCart] = useState<CartItem[]>([])
     const productsPerPage = 12
 
-    // Calculate total pages
     const totalPages = Math.ceil(products.length / productsPerPage)
 
-    // Get current products
     const indexOfLastProduct = currentPage * productsPerPage
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage
     const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct)
 
-    // Change page
     const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
-    // Go to next page
     const nextPage = () => {
         if (currentPage < totalPages) {
             setCurrentPage(currentPage + 1)
         }
     }
 
-    // Add to cart function
-    const addToCart = (product: Product, e: React.MouseEvent) => {
-        e.preventDefault() // Prevent navigation since product is in a Link
+    const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+        e.preventDefault()
 
+        // Folosim funcția addToCart din props dacă există
+        if (addToCart) {
+            addToCart(product)
+            return
+        }
+
+        // Altfel folosim logica locală
         setCart((prevCart) => {
-            // Check if product is already in cart
             const existingItem = prevCart.find((item) => item.id === product.id)
 
             if (existingItem) {
-                // If product exists, increase quantity
                 return prevCart.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item))
             } else {
-                // If product doesn't exist, add it with quantity 1
                 return [...prevCart, { ...product, quantity: 1 }]
             }
         })
     }
 
-    // Calculate total items in cart
     const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0)
 
     return (
@@ -155,7 +148,7 @@ const Shop = ({ products }: ShopProps) => {
                                 <p className="text-lg font-bold text-emerald-800 mt-2">{product.price.toFixed(2)} Mdl</p>
                                 <button
                                     className="w-full mt-4 bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 transition-colors flex items-center justify-center"
-                                    onClick={(e) => addToCart(product, e)}
+                                    onClick={(e) => handleAddToCart(product, e)}
                                 >
                                     <FiShoppingCart className="mr-2" />
                                     Adaugă în coș
