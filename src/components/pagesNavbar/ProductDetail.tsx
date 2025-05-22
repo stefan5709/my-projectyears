@@ -30,8 +30,8 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
     const productImages = [
         product?.image,
         "/placeholder.svg?height=600&width=600",
-        "/placeholder.svg?height=600&width=600",
-        "/placeholder.svg?height=600&width=600",
+        "/placeholder1.svg?height=600&width=600",
+        "/placeholder2.svg?height=600&width=600",
     ]
 
     // Găsim produse similare pentru secțiunea "Related Products"
@@ -146,9 +146,15 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                     </p>
                                 </div>
 
-                                <div className="flex items-center mb-4">
-                                    <span className="font-medium w-32">Culori disponibile:</span>
-                                    <span className="text-gray-600">White / Black</span>
+                                <div className="flex items-center">
+                                    <h2 className="text-left px-4 py-4 "> Culori disponibile: </h2>
+                                    <br></br>
+                                    <button className="w-16  bg-gray-100 hover:bg-gray-200 text-black rounded-md  transition-colors">
+                                        Black
+                                    </button>
+                                    <button className="w-16 bg-gray-100 hover:bg-gray-200 text-black rounded-md  transition-colors">
+                                        White
+                                    </button>
                                 </div>
                             </div>
 

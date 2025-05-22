@@ -44,13 +44,12 @@ const Shop = ({ products, addToCart }: ShopProps) => {
     const handleAddToCart = (product: Product, e: React.MouseEvent) => {
         e.preventDefault()
 
-        // Folosim funcția addToCart din props dacă există
+
         if (addToCart) {
             addToCart(product)
             return
         }
 
-        // Altfel folosim logica locală
         setCart((prevCart) => {
             const existingItem = prevCart.find((item) => item.id === product.id)
 
