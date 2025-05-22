@@ -1,5 +1,3 @@
-
-
 import { useParams, Link } from "react-router-dom"
 import { FiShoppingCart, FiChevronLeft, FiChevronRight } from "react-icons/fi"
 import { useState } from "react"
@@ -25,13 +23,15 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
     const [quantity, setQuantity] = useState(1)
     const [selectedSize, setSelectedSize] = useState("M")
     const [activeImage, setActiveImage] = useState(0)
+    const [selectedColor, setSelectedColor] = useState("Black")
 
     // Simulăm mai multe imagini pentru produs
     const productImages = [
         product?.image,
-        "/placeholder.svg?height=600&width=600",
-        "/placeholder1.svg?height=600&width=600",
-        "/placeholder2.svg?height=600&width=600",
+        "/img/img2/blonde-woman-sportswear-near-concrete-wall.jpg?height=600&width=600",
+        "/img/img2/pensive-blonde-female-goes-sport-summer.jpg?height=600&width=600",
+        "/img/img2/brunette-woman-wearing-sport-clothes.jpg?height=600&width=600",
+        "/img/img2/brunette-woman-wearing-sport-clothes-2.jpg?height=600&width=600",
     ]
 
     // Găsim produse similare pentru secțiunea "Related Products"
@@ -72,7 +72,7 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                         <div className="md:w-1/2 space-y-4">
                             <div className="relative overflow-hidden rounded-lg border">
                                 <img
-                                    src={productImages[activeImage] || "/placeholder.svg?height=600&width=600"}
+                                    src={productImages[activeImage] || "/img/img2/blonde-woman-sportswear-near-concrete-wall?height=600&width=600"}
                                     alt={product.name}
                                     className="w-full h-[500px] object-cover"
                                 />
@@ -102,7 +102,7 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                             }`}
                                     >
                                         <img
-                                            src={img || "/placeholder.svg?height=100&width=100"}
+                                            src={img || "/img/happymen&women.jpg?height=100&width=100"}
                                             alt={`${product.name} thumbnail ${index + 1}`}
                                             className="w-20 h-20 object-cover"
                                         />
@@ -111,8 +111,8 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                             </div>
                         </div>
 
-                        {/* Product Info - Right Side */}
-                        <div className="md:w-1/2 space-y-6">
+                        {/* Product Info */}
+                        <div className="md:w-1/2 space-y-5">
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
                                 <div className="mt-2 flex items-center">
@@ -121,7 +121,7 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                             key={i}
                                             className={`w-5 h-5 ${i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300 fill-current"
                                                 }`}
-                                            xmlns="http://www.w3.org/2000/svg"
+
                                             viewBox="0 0 20 20"
                                         >
                                             <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
@@ -145,16 +145,49 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                         confortabil, design modern.
                                     </p>
                                 </div>
+                                <div className="border-t border-black my-7"></div>
 
-                                <div className="flex items-center">
-                                    <h2 className="text-left px-4 py-4 "> Culori disponibile: </h2>
-                                    <br></br>
-                                    <button className="w-16  bg-gray-100 hover:bg-gray-200 text-black rounded-md  transition-colors">
-                                        Black
-                                    </button>
-                                    <button className="w-16 bg-gray-100 hover:bg-gray-200 text-black rounded-md  transition-colors">
-                                        White
-                                    </button>
+
+                                <div className="flex items-center mb-4">
+                                    <h2 className="font-medium w-48">Culori disponibile:</h2>
+                                    <div className="flex space-x-4">
+                                        <button
+                                            onClick={() => setSelectedColor("Black")}
+                                            className={`w-16 h-8 text-xs flex items-center justify-center ${selectedColor === "Black"
+                                                ? "bg-emerald-600 text-white"
+                                                : "bg-gray-100 hover:bg-gray-200 text-black"
+                                                } rounded-md transition-colors`}
+                                        >
+                                            Black
+                                        </button>
+                                        <button
+                                            onClick={() => setSelectedColor("White")}
+                                            className={`w-16 h-8 text-xs flex items-center justify-center ${selectedColor === "White"
+                                                ? "bg-emerald-600 text-white"
+                                                : "bg-gray-100 hover:bg-gray-200 text-black"
+                                                } rounded-md transition-colors`}
+                                        >
+                                            White
+                                        </button>
+                                        <button
+                                            onClick={() => setSelectedColor("Red")}
+                                            className={`w-16 h-8 text-xs flex items-center justify-center ${selectedColor === "Red"
+                                                ? "bg-emerald-600 text-white"
+                                                : "bg-gray-100 hover:bg-gray-200 text-black"
+                                                } rounded-md transition-colors`}
+                                        >
+                                            Red
+                                        </button>
+                                        <button
+                                            onClick={() => setSelectedColor("Gray")}
+                                            className={`w-16 h-8 text-xs flex items-center justify-center ${selectedColor === "Gray"
+                                                ? "bg-emerald-600 text-white"
+                                                : "bg-gray-100 hover:bg-gray-200 text-black"
+                                                } rounded-md transition-colors`}
+                                        >
+                                            Gray
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -226,7 +259,7 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                             >
                                 <div className="relative">
                                     <img
-                                        src={relatedProduct.image || "/placeholder.svg?height=300&width=300"}
+                                        src={relatedProduct.image || "/img/?height=300&width=300"}
                                         alt={relatedProduct.name}
                                         className="w-full h-60 object-cover"
                                     />

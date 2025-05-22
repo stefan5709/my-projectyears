@@ -12,9 +12,6 @@ import LogIn from './components/button/LogIn';
 import SignIn from './components/button/SignIn';
 import DashBoard from "./components/button/Dashboard";
 import ProductDetail from './components/pagesNavbar/ProductDetail';
-
-
-
 import './App.css';
 
 const productData = [
