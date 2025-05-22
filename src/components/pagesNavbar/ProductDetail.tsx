@@ -145,7 +145,7 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                         confortabil, design modern.
                                     </p>
                                 </div>
-                                <div className="border-t border-black my-7"></div>
+                                <div className="border-t border-gray-200 my-7"></div>
 
 
                                 <div className="flex items-center mb-4">
