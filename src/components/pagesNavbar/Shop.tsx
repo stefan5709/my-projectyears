@@ -1,7 +1,9 @@
 import type React from "react"
 import { FiShoppingCart, FiHeart, FiSearch, FiStar } from "react-icons/fi"
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { Link } from "react-router-dom";
+import type { Product as Product2, ProductImage } from "../../models/product.model";
+import type { PagedResult } from "../../models/paged-result.model";
 
 interface Product {
     id: number
@@ -22,18 +24,11 @@ interface ShopProps {
     addToCart?: (product: Product) => void
 }
 
-const Shop = ({ products, addToCart }: ShopProps) => {
+const Shop = ({ addToCart }: ShopProps) => {
     const [currentPage, setCurrentPage] = useState(1)
     const [cart, setCart] = useState<CartItem[]>([])
-    const productsPerPage = 12
-
-    const totalPages = Math.ceil(products.length / productsPerPage)
-
-    const indexOfLastProduct = currentPage * productsPerPage
-    const indexOfFirstProduct = indexOfLastProduct - productsPerPage
-    const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct)
-
-    const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
+    const [products, setProducts] = useState<Product2[]>([]);
+    const [totalPages, setTotalPages] = useState<number>(0);
 
     const nextPage = () => {
         if (currentPage < totalPages) {
@@ -41,12 +36,12 @@ const Shop = ({ products, addToCart }: ShopProps) => {
         }
     }
 
-    const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+    const handleAddToCart = (product: Product2, e: React.MouseEvent) => {
         e.preventDefault()
 
-
-        if (addToCart) {
-            addToCart(product)
+        console.log(product);
+        /*if (addToCart) {
+            //addToCart(product)
             return
         }
 
@@ -58,10 +53,42 @@ const Shop = ({ products, addToCart }: ShopProps) => {
             } else {
                 return [...prevCart, { ...product, quantity: 1 }]
             }
-        })
+        })*/
     }
 
     const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0)
+
+    useEffect(() => {
+        async function fetchProducts(page: number, pageSize: number): Promise<PagedResult<Product2>> {
+            const response = await fetch(`http://localhost:8000/api/v1/products?page=${page}&pageSize=${pageSize}`);
+            var data = await response.json();
+
+            return ({
+                page: data.page,
+                pageSize: data.pageSize,
+                pageCount: data.pageCount,
+                rowCount: data.rowCount,
+                results: data.results.map((product: any) => ({
+                    id: product.id,
+                    name: product.name,
+                    rating: product.rating,
+                    price: product.variants[0].price,
+                    image: product.images.find((image: ProductImage) => image.isMain),
+                    createdAt: new Date(product.createdAt)
+                } as Product2))
+            } as PagedResult<Product2>)
+        }
+
+        async function getProducts(page: number, pageSize: number): Promise<void> {
+            const result = await fetchProducts(page, pageSize);
+
+            setProducts(result.results);
+            setTotalPages(result.pageCount);
+        }
+
+        getProducts(currentPage, 10);
+        //TODO: scroll to top
+    }, [currentPage]);
 
     return (
         <div className="bg-gray-50">
@@ -118,7 +145,7 @@ const Shop = ({ products, addToCart }: ShopProps) => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {currentProducts.map((product) => (
+                    {products.map((product) => (
                         <Link
                             to={`/product/${product.id}`}
                             key={product.id}
@@ -126,11 +153,11 @@ const Shop = ({ products, addToCart }: ShopProps) => {
                         >
                             <div className="relative">
                                 <img
-                                    src={product.image || "/placeholder.svg"}
-                                    alt={product.name}
+                                    src={product.image.url || "/placeholder.svg"}
+                                    alt={product.image.description}
                                     className="w-full h-60 object-cover"
                                 />
-                                {product.isNew && (
+                                {true && (
                                     <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs px-2 py-1 rounded">
                                         NOU
                                     </span>
@@ -163,7 +190,7 @@ const Shop = ({ products, addToCart }: ShopProps) => {
                     {Array.from({ length: totalPages }, (_, i) => (
                         <button
                             key={i + 1}
-                            onClick={() => paginate(i + 1)}
+                            onClick={() => setCurrentPage(i + 1)}
                             className={`px-3 py-1 border rounded-md ${currentPage === i + 1 ? "text-white bg-emerald-600 border-emerald-600" : "hover:bg-gray-100"
                                 }`}
                         >

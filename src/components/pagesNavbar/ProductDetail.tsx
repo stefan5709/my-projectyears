@@ -1,44 +1,37 @@
 import { useParams, Link } from "react-router-dom"
 import { FiShoppingCart, FiChevronLeft, FiChevronRight } from "react-icons/fi"
-import { useState } from "react"
-
-interface Product {
-    id: number
-    name: string
-    price: number
-    rating: number
-    image: string
-    isNew?: boolean
-    category?: string
-}
+import { useEffect, useState } from "react";
+import type { Product, ProductImage, DetailedProduct, ProductVariantResponse } from "../../models/product.model";
+import type { PagedResult } from "../../models/paged-result.model";
 
 interface ProductDetailProps {
-    products: Product[]
+    products: any[]
 }
 
-const ProductDetail = ({ products }: ProductDetailProps) => {
+const ProductDetail = ({ }: ProductDetailProps) => {
     const { id } = useParams<{ id: string }>()
-    const product = products.find((p) => p.id === Number(id))
+    const [product, setProduct] = useState<DetailedProduct | undefined>(undefined);
+    const [productSizes, setProductSizes] = useState<string[]>([]);
+    const [variantPrice, setVariantPrice] = useState<number>(0);
+
+    const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
     const [quantity, setQuantity] = useState(1)
-    const [selectedSize, setSelectedSize] = useState("M")
+    const [selectedSize, setSelectedSize] = useState<string | undefined>()
     const [activeImage, setActiveImage] = useState(0)
     const [selectedColor, setSelectedColor] = useState("Black")
 
-    // Simulăm mai multe imagini pentru produs
+    /*// Simulăm mai multe imagini pentru produs
     const productImages = [
         product?.image,
         "/img/img2/blonde-woman-sportswear-near-concrete-wall.jpg?height=600&width=600",
         "/img/img2/pensive-blonde-female-goes-sport-summer.jpg?height=600&width=600",
         "/img/img2/brunette-woman-wearing-sport-clothes.jpg?height=600&width=600",
         "/img/img2/brunette-woman-wearing-sport-clothes-2.jpg?height=600&width=600",
-    ]
+    ]*/
 
-    // Găsim produse similare pentru secțiunea "Related Products"
-    const relatedProducts = products.filter((p) => p.category === product?.category && p.id !== product?.id).slice(0, 4)
-
-    if (!product) {
-        return <div className="text-center py-20">Produsul nu a fost găsit</div>
+    const generateRandomNumber = (min: number, max: number): number => {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     const decreaseQuantity = () => {
@@ -49,6 +42,82 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
 
     const increaseQuantity = () => {
         setQuantity(quantity + 1)
+    }
+
+    useEffect(() => {
+        async function fetchProducts(page: number, pageSize: number): Promise<PagedResult<Product>> {
+            const response = await fetch(`http://localhost:8000/api/v1/products?page=${page}&pageSize=${pageSize}`);
+            var data = await response.json();
+
+            return ({
+                page: data.page,
+                pageSize: data.pageSize,
+                pageCount: data.pageCount,
+                rowCount: data.rowCount,
+                results: data.results.map((product: any) => ({
+                    id: product.id,
+                    name: product.name,
+                    rating: product.rating,
+                    price: product.variants[0].price,
+                    image: product.images.find((image: ProductImage) => image.isMain),
+                    createdAt: new Date(product.createdAt)
+                } as Product))
+            } as PagedResult<Product>)
+        }
+
+        async function fetchProduct(productId: string): Promise<DetailedProduct> {
+            const response = await fetch(`http://localhost:8000/api/v1/products/${productId}`);
+            var data = await response.json();
+
+            return ({
+                id: data.id,
+                name: data.name,
+                description: data.description,
+                rating: data.rating,
+                reviews: data.reviews,
+                images: data.images.map((image: ProductImage) => image),
+                createdAt: new Date(data.createdAt),
+                variants: (data.variants as ProductVariantResponse[]).map(variant => ({
+                    id: variant.id,
+                    sku: variant.skuCode,
+                    size: variant.size,
+                    createdAt: new Date(variant.createdAt),
+                    price: variant.price,
+                    inStock: variant.inStock,
+                    isEnabled: variant.isEnabled
+                }))
+            } as DetailedProduct)
+        }
+
+        async function getProductById(productId: string): Promise<void> {
+            const result = await fetchProduct(productId);
+            const relatedProductsResult = await fetchProducts(generateRandomNumber(1, 27), 4);
+            setProduct(result);
+            setRelatedProducts(relatedProductsResult.results);
+        }
+
+        if (!id) return;
+
+        getProductById(id);
+    }, []);
+
+    useEffect(() => {
+        if (!product) return;
+
+        const sizes = product.variants.flatMap(variant => variant.size);
+        setProductSizes(sizes);
+        setSelectedSize(sizes[0]);
+    }, [product]);
+
+    useEffect(() => {
+        if (!selectedSize || !product) return;
+
+        const price = product.variants.find(variant => variant.size === selectedSize)!.price;
+        setVariantPrice(price);
+    }, [selectedSize, product]);
+
+    if (!id || !product) {
+        return <div className="text-center py-20">Produsul nu a fost găsit</div>
     }
 
     return (
@@ -72,20 +141,20 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                         <div className="md:w-1/2 space-y-4">
                             <div className="relative overflow-hidden rounded-lg border">
                                 <img
-                                    src={productImages[activeImage] || "/img/img2/blonde-woman-sportswear-near-concrete-wall?height=600&width=600"}
-                                    alt={product.name}
+                                    src={product.images[activeImage].url || "/img/img2/blonde-woman-sportswear-near-concrete-wall?height=600&width=600"}
+                                    alt={product.images[activeImage].description}
                                     className="w-full h-[500px] object-cover"
                                 />
 
                                 {/* Navigation arrows */}
                                 <button
-                                    onClick={() => setActiveImage((prev) => (prev > 0 ? prev - 1 : productImages.length - 1))}
+                                    onClick={() => setActiveImage((prev) => (prev > 0 ? prev - 1 : product.images.length - 1))}
                                     className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 hover:bg-white"
                                 >
                                     <FiChevronLeft className="text-gray-800" />
                                 </button>
                                 <button
-                                    onClick={() => setActiveImage((prev) => (prev < productImages.length - 1 ? prev + 1 : 0))}
+                                    onClick={() => setActiveImage((prev) => (prev < product.images.length - 1 ? prev + 1 : 0))}
                                     className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 hover:bg-white"
                                 >
                                     <FiChevronRight className="text-gray-800" />
@@ -94,7 +163,7 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
 
                             {/* Thumbnails */}
                             <div className="flex space-x-2 overflow-x-auto">
-                                {productImages.map((img, index) => (
+                                {product.images.map((img, index) => (
                                     <button
                                         key={index}
                                         onClick={() => setActiveImage(index)}
@@ -102,8 +171,8 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                             }`}
                                     >
                                         <img
-                                            src={img || "/img/happymen&women.jpg?height=100&width=100"}
-                                            alt={`${product.name} thumbnail ${index + 1}`}
+                                            src={img.url || "/img/happymen&women.jpg?height=100&width=100"}
+                                            alt={img.description}
                                             className="w-20 h-20 object-cover"
                                         />
                                     </button>
@@ -127,9 +196,9 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                             <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                                         </svg>
                                     ))}
-                                    <span className="ml-2 text-gray-600">Rating {product.rating.toFixed(1)} | 36 Comentarii</span>
+                                    <span className="ml-2 text-gray-600">Rating {product.rating} | {product.reviews} Comentarii</span>
                                 </div>
-                                <div className="mt-4 text-3xl font-bold text-emerald-700">{product.price.toFixed(2)} Mdl</div>
+                                <div className="mt-4 text-3xl font-bold text-emerald-700">{variantPrice} Mdl</div>
                             </div>
 
                             <div className="border-t border-b py-4">
@@ -141,8 +210,7 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                 <div className="mb-4">
                                     <span className="font-medium">Descriere:</span>
                                     <p className="mt-2 text-gray-600">
-                                        Produs de înaltă calitate, perfect pentru activități sportive și fitness. Material respirabil și
-                                        confortabil, design modern.
+                                        {product.description}
                                     </p>
                                 </div>
                                 <div className="border-t border-gray-200 my-7"></div>
@@ -197,7 +265,7 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                     <div className="flex items-center">
                                         <span className="mr-4">Size:</span>
                                         <div className="flex space-x-2">
-                                            {["S", "M", "L", "XL"].map((size) => (
+                                            {productSizes.map((size) => (
                                                 <button
                                                     key={size}
                                                     onClick={() => setSelectedSize(size)}
@@ -253,17 +321,18 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {relatedProducts.map((relatedProduct) => (
                             <Link
+                                reloadDocument
                                 to={`/product/${relatedProduct.id}`}
                                 key={relatedProduct.id}
                                 className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
                             >
                                 <div className="relative">
                                     <img
-                                        src={relatedProduct.image || "/img/?height=300&width=300"}
+                                        src={relatedProduct.image.url || "/img/?height=300&width=300"}
                                         alt={relatedProduct.name}
                                         className="w-full h-60 object-cover"
                                     />
-                                    {relatedProduct.isNew && (
+                                    {true && (
                                         <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs px-2 py-1 rounded">
                                             NOU
                                         </span>
@@ -283,7 +352,7 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                                             <span className="ml-1 text-sm text-gray-600">{relatedProduct.rating}</span>
                                         </div>
                                     </div>
-                                    <p className="text-lg font-bold text-emerald-800 mt-2">{relatedProduct.price.toFixed(2)} Mdl</p>
+                                    <p className="text-lg font-bold text-emerald-800 mt-2">{relatedProduct.price} Mdl</p>
                                 </div>
                             </Link>
                         ))}
