@@ -1,7 +1,8 @@
 import type React from "react"
 import { FiShoppingCart, FiHeart, FiSearch, FiStar } from "react-icons/fi"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { getProducts, type Product as SupabaseProduct } from "../../lib/supabase"
 
 interface Product {
     id: number
@@ -18,14 +19,52 @@ interface CartItem extends Product {
 }
 
 interface ShopProps {
-    products: Product[]
+    products?: Product[]
     addToCart?: (product: Product) => void
 }
 
-const Shop = ({ products, addToCart }: ShopProps) => {
+const Shop = ({ products: propProducts, addToCart }: ShopProps) => {
+    const [products, setProducts] = useState<Product[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
     const [cart, setCart] = useState<CartItem[]>([])
     const productsPerPage = 12
+
+    // Fetch products from Supabase on mount
+    useEffect(() => {
+        async function fetchProducts() {
+            try {
+                setLoading(true)
+                const data = await getProducts()
+                
+                // Transform Supabase products to match our Product interface
+                const transformedProducts: Product[] = data.map((p: SupabaseProduct) => ({
+                    id: p.id,
+                    name: p.name,
+                    price: Number(p.price),
+                    rating: Number(p.rating),
+                    image: p.image,
+                    isNew: p.is_new,
+                    category: p.category || undefined
+                }))
+                
+                setProducts(transformedProducts)
+                setError(null)
+            } catch (err) {
+                console.error('Error fetching products:', err)
+                setError('Nu am putut încărca produsele. Verifică conexiunea.')
+                // Fallback to prop products if available
+                if (propProducts && propProducts.length > 0) {
+                    setProducts(propProducts)
+                }
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchProducts()
+    }, [propProducts])
 
     const totalPages = Math.ceil(products.length / productsPerPage)
 
@@ -43,7 +82,6 @@ const Shop = ({ products, addToCart }: ShopProps) => {
 
     const handleAddToCart = (product: Product, e: React.MouseEvent) => {
         e.preventDefault()
-
 
         if (addToCart) {
             addToCart(product)
@@ -97,7 +135,7 @@ const Shop = ({ products, addToCart }: ShopProps) => {
                     <h2 className="text-xl font-semibold mb-4 md:mb-0">
                         Toate produsele{" "}
                         <span className="text-gray-500 text-sm ml-2">
-                            (Pagina {currentPage} din {totalPages}, {products.length} produse)
+                            (Pagina {currentPage} din {totalPages || 1}, {products.length} produse)
                         </span>
                     </h2>
                     <div className="flex space-x-4">
@@ -117,69 +155,97 @@ const Shop = ({ products, addToCart }: ShopProps) => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {currentProducts.map((product) => (
-                        <Link
-                            to={`/product/${product.id}`}
-                            key={product.id}
-                            className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-                        >
-                            <div className="relative">
-                                <img
-                                    src={product.image || "/placeholder.svg"}
-                                    alt={product.name}
-                                    className="w-full h-60 object-cover"
-                                />
-                                {product.isNew && (
-                                    <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs px-2 py-1 rounded">
-                                        NOU
-                                    </span>
-                                )}
-                            </div>
-                            <div className="p-4">
-                                <div className="flex justify-between items-start">
-                                    <h3 className="font-medium text-gray-900">{product.name}</h3>
-                                    <div className="flex items-center">
-                                        <FiStar className="text-yellow-400" />
-                                        <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
-                                    </div>
+                {/* Loading state */}
+                {loading && (
+                    <div className="flex justify-center items-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+                        <span className="ml-4 text-gray-600">Se încarcă produsele...</span>
+                    </div>
+                )}
+
+                {/* Error state */}
+                {error && !loading && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center text-red-700">
+                        {error}
+                    </div>
+                )}
+
+                {/* Products grid */}
+                {!loading && !error && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {currentProducts.map((product) => (
+                            <Link
+                                to={`/product/${product.id}`}
+                                key={product.id}
+                                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                            >
+                                <div className="relative">
+                                    <img
+                                        src={product.image || "/placeholder.svg"}
+                                        alt={product.name}
+                                        className="w-full h-60 object-cover"
+                                    />
+                                    {product.isNew && (
+                                        <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs px-2 py-1 rounded">
+                                            NOU
+                                        </span>
+                                    )}
                                 </div>
-                                <p className="text-lg font-bold text-emerald-800 mt-2">{product.price.toFixed(2)} Mdl</p>
-                                <button
-                                    className="w-full mt-4 bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 transition-colors flex items-center justify-center"
-                                    onClick={(e) => handleAddToCart(product, e)}
-                                >
-                                    <FiShoppingCart className="mr-2" />
-                                    Adaugă în coș
-                                </button>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+                                <div className="p-4">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="font-medium text-gray-900">{product.name}</h3>
+                                        <div className="flex items-center">
+                                            <FiStar className="text-yellow-400" />
+                                            <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
+                                        </div>
+                                    </div>
+                                    <p className="text-lg font-bold text-emerald-800 mt-2">{product.price.toFixed(2)} Mdl</p>
+                                    <button
+                                        className="w-full mt-4 bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 transition-colors flex items-center justify-center"
+                                        onClick={(e) => handleAddToCart(product, e)}
+                                    >
+                                        <FiShoppingCart className="mr-2" />
+                                        Adaugă în coș
+                                    </button>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+
+                {/* Empty state */}
+                {!loading && !error && products.length === 0 && (
+                    <div className="text-center py-20 text-gray-500">
+                        Nu există produse disponibile.
+                    </div>
+                )}
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-8 flex justify-center">
-                <nav className="flex space-x-2">
-                    {Array.from({ length: totalPages }, (_, i) => (
+            {/* Pagination */}
+            {!loading && products.length > 0 && (
+                <div className="max-w-7xl mx-auto px-4 py-8 flex justify-center">
+                    <nav className="flex space-x-2">
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => paginate(i + 1)}
+                                className={`px-3 py-1 border rounded-md ${currentPage === i + 1 ? "text-white bg-emerald-600 border-emerald-600" : "hover:bg-gray-100"
+                                    }`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
                         <button
-                            key={i + 1}
-                            onClick={() => paginate(i + 1)}
-                            className={`px-3 py-1 border rounded-md ${currentPage === i + 1 ? "text-white bg-emerald-600 border-emerald-600" : "hover:bg-gray-100"
+                            onClick={nextPage}
+                            disabled={currentPage === totalPages}
+                            className={`px-3 py-1 border rounded-md ${currentPage === totalPages ? "text-gray-400 cursor-not-allowed" : "hover:bg-gray-100"
                                 }`}
                         >
-                            {i + 1}
+                            →
                         </button>
-                    ))}
-                    <button
-                        onClick={nextPage}
-                        disabled={currentPage === totalPages}
-                        className={`px-3 py-1 border rounded-md ${currentPage === totalPages ? "text-gray-400 cursor-not-allowed" : "hover:bg-gray-100"
-                            }`}
-                    >
-                        →
-                    </button>
-                </nav>
-            </div>
+                    </nav>
+                </div>
+            )}
         </div>
     )
 }
