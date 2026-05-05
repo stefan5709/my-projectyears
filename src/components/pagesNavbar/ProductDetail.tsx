@@ -1,29 +1,62 @@
 import { useParams, Link } from "react-router-dom"
 import { FiShoppingCart, FiChevronLeft, FiChevronRight } from "react-icons/fi"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { supabase, type Product } from "../../lib/supabase"
 
-interface Product {
-    id: number
-    name: string
-    price: number
-    rating: number
-    image: string
-    isNew?: boolean
-    category?: string
-}
-
-interface ProductDetailProps {
-    products: Product[]
-}
-
-const ProductDetail = ({ products }: ProductDetailProps) => {
+const ProductDetail = () => {
     const { id } = useParams<{ id: string }>()
-    const product = products.find((p) => p.id === Number(id))
+    const [product, setProduct] = useState<Product | null>(null)
+    const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     const [quantity, setQuantity] = useState(1)
     const [selectedSize, setSelectedSize] = useState("M")
     const [activeImage, setActiveImage] = useState(0)
     const [selectedColor, setSelectedColor] = useState("Black")
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            if (!id) return
+
+            setLoading(true)
+            setError(null)
+
+            try {
+                // Fetch the main product
+                const { data: productData, error: productError } = await supabase
+                    .from('products')
+                    .select('*')
+                    .eq('id', Number(id))
+                    .single()
+
+                if (productError) throw productError
+
+                setProduct(productData)
+
+                // Fetch related products (same category, different id)
+                if (productData?.category) {
+                    const { data: relatedData, error: relatedError } = await supabase
+                        .from('products')
+                        .select('*')
+                        .eq('category', productData.category)
+                        .neq('id', Number(id))
+                        .limit(4)
+
+                    if (!relatedError && relatedData) {
+                        setRelatedProducts(relatedData)
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching product:', err)
+                setError('Nu am putut încărca produsul')
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchProduct()
+    }, [id])
 
     // Simulăm mai multe imagini pentru produs
     const productImages = [
@@ -34,13 +67,6 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
         "/img/img2/brunette-woman-wearing-sport-clothes-2.jpg?height=600&width=600",
     ]
 
-    // Găsim produse similare pentru secțiunea "Related Products"
-    const relatedProducts = products.filter((p) => p.category === product?.category && p.id !== product?.id).slice(0, 4)
-
-    if (!product) {
-        return <div className="text-center py-20">Produsul nu a fost găsit</div>
-    }
-
     const decreaseQuantity = () => {
         if (quantity > 1) {
             setQuantity(quantity - 1)
@@ -49,6 +75,25 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
 
     const increaseQuantity = () => {
         setQuantity(quantity + 1)
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+            </div>
+        )
+    }
+
+    if (error || !product) {
+        return (
+            <div className="text-center py-20">
+                <p className="text-red-600 mb-4">{error || 'Produsul nu a fost găsit'}</p>
+                <Link to="/shop" className="text-emerald-600 hover:underline">
+                    Înapoi la magazin
+                </Link>
+            </div>
+        )
     }
 
     return (
@@ -248,47 +293,49 @@ const ProductDetail = ({ products }: ProductDetailProps) => {
                 </div>
 
                 {/* Related Products */}
-                <div className="mt-16">
-                    <h2 className="text-2xl font-bold mb-6">Produse similare</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {relatedProducts.map((relatedProduct) => (
-                            <Link
-                                to={`/product/${relatedProduct.id}`}
-                                key={relatedProduct.id}
-                                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-                            >
-                                <div className="relative">
-                                    <img
-                                        src={relatedProduct.image || "/img/?height=300&width=300"}
-                                        alt={relatedProduct.name}
-                                        className="w-full h-60 object-cover"
-                                    />
-                                    {relatedProduct.isNew && (
-                                        <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs px-2 py-1 rounded">
-                                            NOU
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="p-4">
-                                    <div className="flex justify-between items-start">
-                                        <h3 className="font-medium text-gray-900">{relatedProduct.name}</h3>
-                                        <div className="flex items-center">
-                                            <svg
-                                                className="w-4 h-4 text-yellow-400 fill-current"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                            </svg>
-                                            <span className="ml-1 text-sm text-gray-600">{relatedProduct.rating}</span>
-                                        </div>
+                {relatedProducts.length > 0 && (
+                    <div className="mt-16">
+                        <h2 className="text-2xl font-bold mb-6">Produse similare</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {relatedProducts.map((relatedProduct) => (
+                                <Link
+                                    to={`/product/${relatedProduct.id}`}
+                                    key={relatedProduct.id}
+                                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                                >
+                                    <div className="relative">
+                                        <img
+                                            src={relatedProduct.image || "/img/?height=300&width=300"}
+                                            alt={relatedProduct.name}
+                                            className="w-full h-60 object-cover"
+                                        />
+                                        {relatedProduct.is_new && (
+                                            <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs px-2 py-1 rounded">
+                                                NOU
+                                            </span>
+                                        )}
                                     </div>
-                                    <p className="text-lg font-bold text-emerald-800 mt-2">{relatedProduct.price.toFixed(2)} Mdl</p>
-                                </div>
-                            </Link>
-                        ))}
+                                    <div className="p-4">
+                                        <div className="flex justify-between items-start">
+                                            <h3 className="font-medium text-gray-900">{relatedProduct.name}</h3>
+                                            <div className="flex items-center">
+                                                <svg
+                                                    className="w-4 h-4 text-yellow-400 fill-current"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 20 20"
+                                                >
+                                                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                                </svg>
+                                                <span className="ml-1 text-sm text-gray-600">{relatedProduct.rating}</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-lg font-bold text-emerald-800 mt-2">{relatedProduct.price.toFixed(2)} Mdl</p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     )
